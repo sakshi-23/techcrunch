@@ -2,7 +2,7 @@
 var http = require("http");
 var express = require('express'),
 app = express(),
-port = process.env.PORT || 3000;
+port = process.env.PORT || 8000;
 
 
 
@@ -17,4 +17,6 @@ app.get('/', function(req,res) {
 
 
 //----- Create the server ----- 
-app.listen(port);
+app.listen(port, function() {
+    console.log("KIetchUp API is running on port " + port);
+});
