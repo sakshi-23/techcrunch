@@ -15,7 +15,7 @@ app.get('/', function(req,res) {
 
 
 app.post('/webhook', function(req, res){
-	console.log("Recieved a webhook message "+req.body);
+	console.log("Recieved a webhook message "+req);
 	res.status(200).send();
 });
 
