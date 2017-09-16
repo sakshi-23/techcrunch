@@ -4,6 +4,7 @@
   "description": "KetchUp API",
   "main": "hyphenate_webhook.js",
   "dependencies": {
+    "body-parser": "^1.18.1",
     "express": "^4.15.4"
   },
   "devDependencies": {
