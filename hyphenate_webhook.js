@@ -9,6 +9,7 @@ port = process.env.PORT || 8000;
 
 //-------- Endpoints ------- 
 app.get('/', function(req,res) {
+	console.log("Get home");
   res.send('KetchUp API Version 1');
 });
 
