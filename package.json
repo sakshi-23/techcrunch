@@ -1,0 +1,26 @@
+{
+  "name": "techcrunch",
+  "version": "1.0.0",
+  "description": "KetchUp API",
+  "main": "hyphenate_webhook.js",
+  "dependencies": {
+    "express": "^4.15.4"
+  },
+  "devDependencies": {
+    "nodemon": "^1.12.1"
+  },
+  "scripts": {
+    "start": "nodemon hyphenate_webhook.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sakshi-23/techcrunch.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sakshi-23/techcrunch/issues"
+  },
+  "homepage": "https://github.com/sakshi-23/techcrunch#readme"
+}
