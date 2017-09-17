@@ -55,7 +55,8 @@ json: true };
 var sentiment = require('sentiment');
 var WordPOS = require('wordpos'),
 wordpos = new WordPOS();
-var cusines= ["indian", "pizza", "burgers", "italian", "mexican","beer","cocktails", "wings"];
+var cusines= ["indian", "pizza", "burgers", "italian", "mexican","beer","cocktails", "wings", "chinese", "vietnamese",
+			  "korean", "peruvian"];
 var cusineMapping = {"indian":"indpak", }
 //-------- Endpoints ------- 
 app.get('/', function(req,res) {
@@ -211,13 +212,14 @@ function getSuggestionsForGroup(group_id, res){
 				var searchTermPromises = [];
 				for(i=0;i<results.length;i++){
 					if(results[i].length>1)
-					{
-						searchTermPromises.push(new Promise(function(resolve, reject){
+					{	
+						
+							searchTermPromises.push(new Promise(function(resolve, reject){
 							yelp.search({ term: 'restaurant', location: 'San Francisco', category_filter: results[i], sort:2})
 							.then(function (data) {
 								var names = "";
 								var places = {}
-								
+								console.log();
 								for(var i=0;i<data.businesses.length;i++){
 									var restaurant = {};
 									restaurant['name'] =  data.businesses[i].name;
