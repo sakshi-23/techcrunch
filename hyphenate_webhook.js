@@ -12,15 +12,7 @@ var ObjectID = mongodb.ObjectID;
 var USER_COLLECTION = "users";
 var GROUP_COLLECTION = "groups"
 var db;
-mongodb.MongoClient.connect(process.env.MONGODB_URI, function (err, database) {
-	if (err) {
-		console.log(err);
-		process.exit(1);
-	}
-	db = database;
-	console.log("Database connection ready");
-});
-// mongodb.MongoClient.connect("mongodb://heroku_15m39cv3:pu10kina4hh0pg2paqqf32u0th@ds139954.mlab.com:39954/heroku_15m39cv3", function (err, database) {
+// mongodb.MongoClient.connect(process.env.MONGODB_URI, function (err, database) {
 // 	if (err) {
 // 		console.log(err);
 // 		process.exit(1);
@@ -28,6 +20,14 @@ mongodb.MongoClient.connect(process.env.MONGODB_URI, function (err, database) {
 // 	db = database;
 // 	console.log("Database connection ready");
 // });
+mongodb.MongoClient.connect("mongodb://heroku_15m39cv3:pu10kina4hh0pg2paqqf32u0th@ds139954.mlab.com:39954/heroku_15m39cv3", function (err, database) {
+	if (err) {
+		console.log(err);
+		process.exit(1);
+	}
+	db = database;
+	console.log("Database connection ready");
+});
 //-------- Yelp --------
 var Yelp = require('yelp');
 var yelp = new Yelp({
@@ -52,11 +52,11 @@ json: true };
 
 //--------- NLP modules ---------
 var sentiment = require('sentiment');
-
+var WordPOS = require('wordpos'),
+wordpos = new WordPOS();
 
 //-------- Endpoints ------- 
 app.get('/', function(req,res) {
-
 	res.send('KetchUp API Version 1');
 });
 
@@ -68,7 +68,11 @@ app.post('/register', function(req,res){
 
 app.post('/webhook', function(req, res){
 	for(var i=0; i<req.body.payload.bodies.length;i++){
-		console.log(sentiment(req.body.payload.bodies[i].msg));
+		var msg = req.body.payload.bodies[i].msg
+		console.log(sentiment(msg));
+		wordpos.getNouns(msg, function(words){
+			console.log(words);
+		});
 	}
 	res.status(200).send();
 });
@@ -82,6 +86,20 @@ app.get('/suggestions/:id', function(req, res){
 	getSuggestionsForGroup(req.params.id, res);
 
 });
+
+app.post('/test', function(req, res){
+	var groupID = '27480740134913';
+		var myBody = { target_type: 'chatgroups',
+		target: [ groupID ],
+		msg: { type: 'txt', msg: req.body.msg},
+		from: 'admin' };
+		hyphenate_options['body'] = myBody
+		request(hyphenate_options, function (error, response, body) {
+			if (error) throw new Error(error);
+			console.log(body);
+			res.send("Done");
+		});
+})
 
 
 
@@ -106,17 +124,8 @@ function getSuggestionsForGroup(group_id, res){
 			restaurants.push(data.businesses[i].name);
 			names +=" "+data.businesses[i].name;
 		}
-		var groupID = '27480740134913';
-		var myBody = { target_type: 'chatgroups',
-		target: [ groupID ],
-		msg: { type: 'txt', msg: names},
-		from: 'admin' };
-		hyphenate_options['body'] = myBody
-		request(hyphenate_options, function (error, response, body) {
-			if (error) throw new Error(error);
-			console.log(body);
-			res.send("Done");
-		});
+		res.send(names);
+		
 	})
 	.catch(function (err) {
 		console.error(err);
