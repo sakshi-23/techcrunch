@@ -70,7 +70,7 @@ app.post('/register', function(req,res){
 
 app.post('/webhook', function(req, res){
 	var group_id = req.body.group_id;
-	console.log('/n/n/n/'+group_id);
+	console.log('\n\n\nGroupId '+group_id+' From: '+req.body.from);
 	for(var i=0; i<req.body.payload.bodies.length;i++){
 		var msg = req.body.payload.bodies[i].msg
 		console.log(msg);
