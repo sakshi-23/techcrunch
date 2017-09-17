@@ -59,6 +59,11 @@ var cusines= ["indian", "pizza", "burgers", "italian", "mexican","beer","cocktai
 			  "korean", "peruvian"];
 var cusineMapping = {"indian":"indpak", }
 //-------- Endpoints ------- 
+app.get('/*',function(req,res,next){
+    res.header('Access-Control-Allow-Origin' , 0 );
+    next(); // http://expressjs.com/guide.html#passing-route control
+});
+
 app.get('/', function(req,res) {
 	res.send('KetchUp API Version 1');
 });
@@ -150,11 +155,11 @@ app.get('/suggestions/:id', function(req, res){
 
 
 app.post('/test', function(req, res){
-	var groupID = '27480740134913';
+	var groupID = '27519764987905';
 	var myBody = { target_type: 'chatgroups',
 	target: [ groupID ],
 	msg: { type: 'txt', msg: req.body.msg},
-	from: 'satya' };
+	from: req.body.from };
 	hyphenate_options['body'] = myBody
 	request(hyphenate_options, function (error, response, body) {
 		if (error) throw new Error(error);
