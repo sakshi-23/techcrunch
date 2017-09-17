@@ -91,7 +91,7 @@ app.post('/webhook', function(req, res){
 										});
 									}
 								}else{
-									var doc = {group_id: group_id, search: [keyWord]};
+									var doc = {group_id: group_id, search: [keyWord], places:{}};
 									db.collection(GROUP_COLLECTION).insertOne(doc, function(err, doc) {
 										if (err) {
 											handleError(res, err.message, "Failed to update group doc");
@@ -109,11 +109,24 @@ app.post('/webhook', function(req, res){
 });
 
 
-
-app.post('/create_group', function(req, res){
-
-})
-
+app.post('/vote', function(req, res){
+	var group_id = req.body.group_id;
+	var user_id = req.body.user_id;
+	var place_id = req.body.place_id;
+	db.collection(GROUP_COLLECTION).findOne({group_id: group_id}, function(err, doc) {
+		if(doc!=null){
+			if(!isInArray(doc['places'][place_id]['votes'], user_id))
+			{
+				doc['places'][place_id]['votes'].push(user_id);
+				db.collection(GROUP_COLLECTION).updateOne({group_id: group_id}, doc, function(err, doc) {
+					if (err) {
+						handleError(res, err.message, "Failed to update group doc");
+					} 
+				});
+			}
+		}
+	});
+});
 
 
 app.get('/suggestions/:id', function(req, res){
@@ -175,14 +188,28 @@ function getSuggestionsForGroup(group_id, res){
 					searchString += results[i]+",";
 				}
 				searchString = searchString.slice(0,-1);
-				console.log(searchString);
 				yelp.search({ term: 'restaurants', location: 'San Francisco', category_filter:searchString })
 				.then(function (data) {
-					var restaurants = [];
 					var names = "";
 					for(var i=0;i<data.businesses.length;i++){
-						restaurants.push(data.businesses[i].name);
+						var restaurant = {};
+						restaurant['name'] =  data.businesses[i].name;
+						restaurant['mobile_url'] = data.businesses[i].mobile_url;
+						restaurant['rating'] = data.businesses[i].rating;
+						restaurant['review_count'] = data.businesses[i].review_count;
+						restaurant['image_url'] = data.businesses[i].image_url;
+						restaurant['votes'] = [];
 						names +=" , "+data.businesses[i].name;
+						db.collection(GROUP_COLLECTION).findOne({group_id: group_id}, function(err, doc) {
+							if(!err && doc!=null){
+								doc['places'][place_id] = restaurant;
+								db.collection(GROUP_COLLECTION).updateOne({group_id: group_id}, doc, function(err, doc) {
+									if (err) {
+										handleError(res, err.message, "Failed to update group doc");
+									} 
+								});
+							}
+						});
 					}
 					res.send(names);
 
