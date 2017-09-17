@@ -11,6 +11,7 @@ var mongodb = require("mongodb");
 var ObjectID = mongodb.ObjectID;
 var USER_COLLECTION = "users";
 var GROUP_COLLECTION = "groups"
+var YELP_COLLECTION = "yelp_mapping"
 var db;
 // mongodb.MongoClient.connect(process.env.MONGODB_URI, function (err, database) {
 // 	if (err) {
@@ -55,7 +56,7 @@ var sentiment = require('sentiment');
 var WordPOS = require('wordpos'),
 wordpos = new WordPOS();
 var cusines= ["indian", "pizza", "burgers", "italian", "mexican","beer","cocktails", "wings"];
-
+var cusineMapping = {"indian":"indpak", }
 //-------- Endpoints ------- 
 app.get('/', function(req,res) {
 	res.send('KetchUp API Version 1');
@@ -69,36 +70,37 @@ app.post('/register', function(req,res){
 
 app.post('/webhook', function(req, res){
 	var group_id = req.body.group_id;
-	console.log(group_id);
 	for(var i=0; i<req.body.payload.bodies.length;i++){
 		var msg = req.body.payload.bodies[i].msg
 		wordpos.getNouns(msg, function(words){
 			for(var i=0;i<words.length;i++){
 				if(isCusine(words[i])){
-					db.collection(GROUP_COLLECTION).findOne({ group_id: group_id }, function(err, doc) {
+					var keyWord = words[i];
+					db.collection(GROUP_COLLECTION).findOne({group_id: group_id}, function(err, doc) {
 						if (err) {
-							handleError(res, err.message, "Failed to get contact");
+							handleError(res, err.message, "Failed to get group doc");
 						} else {
 							if(sentiment(msg).score>0){
-								if(!doc){
-									doc['search'] = words[i];
-									db.collection(GROUP_COLLECTION).updateOne({group_id: group_id}, doc, function(err, doc) {
-									if (err) {
-										handleError(res, err.message, "Failed to update contact");
-									} 
-									});
+								if(doc != null){
+									if(!isInArray(doc['search'], keyWord)){
+										doc['search'].push(keyWord);
+										db.collection(GROUP_COLLECTION).updateOne({group_id: group_id}, doc, function(err, doc) {
+											if (err) {
+												handleError(res, err.message, "Failed to update group doc");
+											} 
+										});
+									}
 								}else{
-									var doc = {search: words[i]};
-									db.collection(GROUP_COLLECTION).insertOne({group_id: group_id}, doc, function(err, doc) {
-									if (err) {
-										handleError(res, err.message, "Failed to update contact");
-									} 
+									var doc = {group_id: group_id, search: [keyWord]};
+									db.collection(GROUP_COLLECTION).insertOne(doc, function(err, doc) {
+										if (err) {
+											handleError(res, err.message, "Failed to update group doc");
+										} 
 									});
 								}
 							}
 						}
 					});
-					console.log(sentiment(msg).score+" "+ words[i]);
 				}
 			}
 		});
@@ -106,15 +108,21 @@ app.post('/webhook', function(req, res){
 	res.status(200).send();
 });
 
+
+
 app.post('/create_group', function(req, res){
 
 })
+
+
 
 app.get('/suggestions/:id', function(req, res){
 	console.log(req.params.id);
 	getSuggestionsForGroup(req.params.id, res);
 
 });
+
+
 
 app.post('/test', function(req, res){
 	var groupID = '27480740134913';
@@ -145,21 +153,53 @@ app.listen(port, function() {
 //---------- HELPER FUNCTIONS ---------
 
 function getSuggestionsForGroup(group_id, res){
-	yelp.search({ term: 'restaurants', location: 'San Francisco', category_filter:'indpak' })
-	.then(function (data) {
-		var restaurants = [];
-		var names = "";
-		for(var i=0;i<data.businesses.length;i++){
-			restaurants.push(data.businesses[i].name);
-			names +=" "+data.businesses[i].name;
+	var promises = [];
+	db.collection(GROUP_COLLECTION).findOne({group_id: group_id}, function(err, doc) {
+		if (err || doc == null) {
+			//handleError(res, err.message, "Failed to get group doc");
+		} else {
+			searchTerms = doc['search'];
+			searchString = "";
+			for(i=0;i<searchTerms.length;i++){
+				var search = searchTerms[i].toLowerCase();
+				promises.push(new Promise(function(resolve, reject) {
+					db.collection(YELP_COLLECTION).findOne({title: search.toLowerCase()}, function(err, doc){
+						resolve(doc.alias);
+					});
+				}));
+				
+
+			}
+			Promise.all(promises).then(function(results){
+				for(i=0;i<results.length;i++){
+					searchString += results[i]+",";
+				}
+				searchString = searchString.slice(0,-1);
+				console.log(searchString);
+				yelp.search({ term: 'restaurants', location: 'San Francisco', category_filter:searchString })
+				.then(function (data) {
+					var restaurants = [];
+					var names = "";
+					for(var i=0;i<data.businesses.length;i++){
+						restaurants.push(data.businesses[i].name);
+						names +=" , "+data.businesses[i].name;
+					}
+					res.send(names);
+
+				})
+				.catch(function (err) {
+					console.error(err);
+					res.send('Unable to process request');
+				});
+			}, function(resson){
+
+			});
+			
+
 		}
-		res.send(names);
-		
-	})
-	.catch(function (err) {
-		console.error(err);
-		res.send('Unable to process request');
 	});
+
+	
 }
 
 function insertGroupDoc(group_id){
@@ -173,7 +213,9 @@ function insertGroupDoc(group_id){
 }
 
 
-
+function isInArray(arr, word){
+	return arr.indexOf(word) > -1;
+}
 
 function isCusine(word) {
 	return cusines.indexOf(word.toLowerCase()) > -1;
