@@ -70,8 +70,10 @@ app.post('/register', function(req,res){
 
 app.post('/webhook', function(req, res){
 	var group_id = req.body.group_id;
+	console.log('/n/n/n/'+group_id);
 	for(var i=0; i<req.body.payload.bodies.length;i++){
 		var msg = req.body.payload.bodies[i].msg
+		console.log(msg);
 		wordpos.getNouns(msg, function(words){
 			for(var i=0;i<words.length;i++){
 				if(isCusine(words[i])){
