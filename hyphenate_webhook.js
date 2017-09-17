@@ -123,7 +123,7 @@ app.post('/vote', function(req, res){
 					if (err) {
 						handleError(res, err.message, "Failed to update group doc");
 					} else{
-						res.send("Ok");
+						//res.send("Ok");
 					}
 				});
 			}
@@ -224,13 +224,11 @@ function getSuggestionsForGroup(group_id, res){
 						myId = data.businesses[i].id
 						places[myId] = restaurant;
 						ids.push(myId);
-
 					}
 					console.log(data.total)
 					db.collection(GROUP_COLLECTION).findOne({group_id: group_id}, function(err, doc){
 						if(!err && doc!=null){
 								for(i=0;i<ids.length;i++){
-									console.log(doc['places'][ids[i]]['votes'])
 									places[ids[i]]['votes'] = doc['places'][ids[i]]['votes']==null?[]:doc['places'][ids[i]]['votes'];
 								}
 								doc['places'] = places;
