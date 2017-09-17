@@ -17,7 +17,7 @@
     "nodemon": "^1.12.1"
   },
   "scripts": {
-    "start": "nodemon hyphenate_webhook.js",
+    "start": "node hyphenate_webhook.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
