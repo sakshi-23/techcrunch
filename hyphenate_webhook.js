@@ -259,7 +259,7 @@ function getSuggestionsForGroup(group_id, res){
 						
 						for(var id in results[i]){
 							searchTerm = results[i][id]['category'][0][0].toLowerCase();
-							if(j > (8*count[searchTerm]/totalCount))
+							if(j > (15*count[searchTerm]/totalCount))
 								break;
 							j++;
 							console.log(searchTerm+j);
@@ -302,14 +302,6 @@ function getSuggestionsForGroup(group_id, res){
 		}
 	});
 }
-
-
-
-
-
-
-
-
 
 
 
