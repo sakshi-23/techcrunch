@@ -178,7 +178,8 @@ function getSuggestionsForGroup(group_id, res){
 			for(i=0;i<searchTerms.length;i++){
 				var search = searchTerms[i].toLowerCase();
 				promises.push(new Promise(function(resolve, reject) {
-					db.collection(YELP_COLLECTION).findOne({title: search.toLowerCase()}, function(err, doc){
+					var query = search.toLowerCase();
+					db.collection(YELP_COLLECTION).findOne({title: query}, function(err, doc){
 						resolve(doc.alias);
 					});
 				}));
@@ -207,7 +208,7 @@ function getSuggestionsForGroup(group_id, res){
 						places[myId] = restaurant;
 
 					}
-					console.log(places)
+					console.log(data.total)
 					db.collection(GROUP_COLLECTION).findOne({group_id: group_id}, function(err, doc){
 						if(!err && doc!=null){
 								doc['places'] = places;
@@ -215,8 +216,8 @@ function getSuggestionsForGroup(group_id, res){
 									if (err) {
 										handleError(res, err.message, "Failed to update group doc");
 									} else{
-										console.log(doc);
-										res.send(doc.places);
+										doc['total']=data.total;
+										res.send(doc);
 									}
 								});
 							}
