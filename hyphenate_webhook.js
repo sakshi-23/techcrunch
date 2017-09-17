@@ -256,7 +256,7 @@ function getSuggestionsForGroup(group_id, res){
 					res.send('Unable to process request');
 				});
 			}, function(resson){
-
+				console.log(resson);
 			});
 			
 
