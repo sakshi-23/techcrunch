@@ -82,6 +82,7 @@ app.post('/webhook', function(req, res){
 					db.collection(GROUP_COLLECTION).findOne({group_id: group_id}, function(err, doc) {
 						if (err) {
 							handleError(res, err.message, "Failed to get group doc");
+							res.send("Group does not exist")
 						} else {
 							if(sentiment(msg).score>=0){
 								if(doc != null){
@@ -125,7 +126,6 @@ app.post('/vote', function(req, res){
 		if(doc!=null){
 			if(!isInArray(doc['places'][place_id]['votes'], user_id))
 			{
-				console.log(doc['places'][place_id]['votes'])
 				doc['places'][place_id]['votes'].push(user_id);
 				db.collection(GROUP_COLLECTION).updateOne({group_id: group_id}, doc, function(err, doc) {
 					if (err) {
@@ -259,7 +259,6 @@ function getSuggestionsForGroup(group_id, res){
 						
 						for(var id in results[i]){
 							searchTerm = results[i][id]['category'][0][0].toLowerCase();
-							console.log(8*count[searchTerm]/totalCount);
 							if(j > (8*count[searchTerm]/totalCount))
 								break;
 							j++;
@@ -269,6 +268,7 @@ function getSuggestionsForGroup(group_id, res){
 							
 						}
 					}
+					
 					db.collection(GROUP_COLLECTION).findOne({group_id: group_id}, function(err, doc){
 						if(!err && doc!=null){
 							total = 0;
@@ -280,6 +280,7 @@ function getSuggestionsForGroup(group_id, res){
 								}
 								total++;
 							}
+							places = sortOnVotes(places);
 							doc['places'] = places;
 							doc['total'] = total;
 							db.collection(GROUP_COLLECTION).updateOne({group_id: group_id}, doc, function(err, mydoc) {
@@ -329,5 +330,24 @@ function isInArray(arr, word){
 
 function isCusine(word) {
 	return cusines.indexOf(word.toLowerCase()) > -1;
+}
+
+function sortOnVotes(dict) {
+
+    var sorted = [];
+    for(var key in dict) {
+        sorted[sorted.length] = [key, dict[key]['votes']!=null?dict[key]['votes'].length:0];
+    }
+    sorted.sort(function(a,b){
+    	console.log(a);
+    	return b[1]-a[1];
+    });
+
+    var tempDict = {};
+    for(var i = 0; i < sorted.length; i++) {
+        tempDict[sorted[i][0]] = dict[sorted[i][0]];
+    }
+
+    return tempDict;
 }
 
