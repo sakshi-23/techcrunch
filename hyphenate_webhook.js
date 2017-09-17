@@ -184,11 +184,13 @@ function getSuggestionsForGroup(group_id, res){
 					var query = search.toLowerCase();
 					db.collection(YELP_COLLECTION).findOne({title: query}, function(err, doc){
 						if(doc != null){
+							//console.log(query+doc.alias);
 							resolve(doc.alias);
 						}else{
-							query = ".*"+search+".*";
+							query = ".*"+query+".*";
 							db.collection(YELP_COLLECTION).findOne({title: {$regex : query}}, function(err, doc){
 								if(doc!=null){
+								//	console.log(query+doc.alias);
 									resolve(doc.alias);
 								}else{
 									resolve("");
