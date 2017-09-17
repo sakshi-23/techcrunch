@@ -217,10 +217,9 @@ function getSuggestionsForGroup(group_id, res){
 						restaurant['rating'] = data.businesses[i].rating;
 						restaurant['review_count'] = data.businesses[i].review_count;
 						restaurant['image_url'] = data.businesses[i].image_url;
-						console.log(data.businesses[i].categories)
 						restaurant['category'] = data.businesses[i].categories;
 						restaurant['rating_img_url'] = data.businesses[i].rating_img_url;
-						restaurant['votes'] = [];
+						//restaurant['votes'] = [];
 						names +=" , "+data.businesses[i].name;
 						myId = data.businesses[i].id
 						places[myId] = restaurant;
