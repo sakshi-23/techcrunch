@@ -191,6 +191,7 @@ function getSuggestionsForGroup(group_id, res){
 				yelp.search({ term: 'restaurants', location: 'San Francisco', category_filter:searchString })
 				.then(function (data) {
 					var names = "";
+					var places = {}
 					for(var i=0;i<data.businesses.length;i++){
 						var restaurant = {};
 						restaurant['name'] =  data.businesses[i].name;
@@ -200,18 +201,25 @@ function getSuggestionsForGroup(group_id, res){
 						restaurant['image_url'] = data.businesses[i].image_url;
 						restaurant['votes'] = [];
 						names +=" , "+data.businesses[i].name;
-						db.collection(GROUP_COLLECTION).findOne({group_id: group_id}, function(err, doc) {
-							if(!err && doc!=null){
-								doc['places'][place_id] = restaurant;
-								db.collection(GROUP_COLLECTION).updateOne({group_id: group_id}, doc, function(err, doc) {
+						myId = data.businesses[i].id
+						places[myId] = restaurant;
+
+					}
+					console.log(places)
+					db.collection(GROUP_COLLECTION).findOne({group_id: group_id}, function(err, doc){
+						if(!err && doc!=null){
+								doc['places'] = places;
+								db.collection(GROUP_COLLECTION).updateOne({group_id: group_id}, doc, function(err, mydoc) {
 									if (err) {
 										handleError(res, err.message, "Failed to update group doc");
-									} 
+									} else{
+										console.log(doc);
+										res.send(doc.places);
+									}
 								});
 							}
-						});
-					}
-					res.send(names);
+					});
+					
 
 				})
 				.catch(function (err) {
@@ -247,3 +255,4 @@ function isInArray(arr, word){
 function isCusine(word) {
 	return cusines.indexOf(word.toLowerCase()) > -1;
 }
+
