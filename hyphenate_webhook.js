@@ -207,7 +207,7 @@ function getSuggestionsForGroup(group_id, res){
 						searchString += results[i]+",";
 				}
 				searchString = searchString.slice(0,-1);
-				console.log(searchString);
+				//console.log(searchString);
 				yelp.search({ term: 'restaurants', location: 'San Francisco', category_filter:searchString })
 				.then(function (data) {
 					var names = "";
