@@ -70,21 +70,24 @@ app.post('/register', function(req,res){
 
 app.post('/webhook', function(req, res){
 	var group_id = req.body.group_id;
+	var from = req.body.from;
 	console.log('\n\n\nGroupId '+group_id+' From: '+req.body.from);
 	for(var i=0; i<req.body.payload.bodies.length;i++){
 		var msg = req.body.payload.bodies[i].msg
 		wordpos.getNouns(msg, function(words){
 			for(var i=0;i<words.length;i++){
 				if(isCusine(words[i])){
-					var keyWord = words[i];
+					var keyWord = words[i].toLowerCase();
 					db.collection(GROUP_COLLECTION).findOne({group_id: group_id}, function(err, doc) {
 						if (err) {
 							handleError(res, err.message, "Failed to get group doc");
 						} else {
 							if(sentiment(msg).score>=0){
 								if(doc != null){
-									if(!isInArray(doc['search'], keyWord)){
-										doc['search'].push(keyWord);
+									doc['search'][keyWord] = doc['search'][keyWord]==null?[]:doc['search'][keyWord];
+									
+									if(!isInArray(doc['search'][keyWord], from)){
+										doc['search'][keyWord].push(from);
 										db.collection(GROUP_COLLECTION).updateOne({group_id: group_id}, doc, function(err, doc) {
 											if (err) {
 												handleError(res, err.message, "Failed to update group doc");
@@ -92,7 +95,9 @@ app.post('/webhook', function(req, res){
 										});
 									}
 								}else{
-									var doc = {group_id: group_id, search: [keyWord], places:{}};
+									var obj = {};
+									obj[keyWord] =  [from]
+									var doc = {group_id: group_id, search: obj, places:{}};
 									db.collection(GROUP_COLLECTION).insertOne(doc, function(err, doc) {
 										if (err) {
 											handleError(res, err.message, "Failed to update group doc");
@@ -179,8 +184,8 @@ function getSuggestionsForGroup(group_id, res){
 		} else {
 			searchTerms = doc['search'];
 			searchString = "";
-			for(i=0;i<searchTerms.length;i++){
-				var search = searchTerms[i].toLowerCase();
+			for(var searchTerm in searchTerms){
+				var search = searchTerm.toLowerCase();
 				promises.push(new Promise(function(resolve, reject) {
 					var query = search.toLowerCase();
 					db.collection(YELP_COLLECTION).findOne({title: query}, function(err, doc){
@@ -192,79 +197,115 @@ function getSuggestionsForGroup(group_id, res){
 							db.collection(YELP_COLLECTION).findOne({title: {$regex : query}}, function(err, doc){
 								if(doc!=null){
 								//	console.log(query+doc.alias);
-									resolve(doc.alias);
-								}else{
-									resolve("");
-								}
-							});
+								resolve(doc.alias);
+							}else{
+								resolve("");
+							}
+						});
 						}
 					});
 				}));
 			}
+			
 			Promise.all(promises).then(function(results){
+				var searchTermPromises = [];
 				for(i=0;i<results.length;i++){
 					if(results[i].length>1)
-						searchString += results[i]+",";
-				}
-				searchString = searchString.slice(0,-1);
-				console.log("Search Trem"+searchString);
-				yelp.search({ term: 'restaurants', location: 'San Francisco', category_filter:searchString })
-				.then(function (data) {
-					var names = "";
-					var places = {}
-					var ids = [];
-					for(var i=0;i<data.businesses.length;i++){
-						var restaurant = {};
-						restaurant['name'] =  data.businesses[i].name;
-						restaurant['mobile_url'] = data.businesses[i].mobile_url;
-						restaurant['rating'] = data.businesses[i].rating;
-						restaurant['review_count'] = data.businesses[i].review_count;
-						restaurant['image_url'] = data.businesses[i].image_url;
-						restaurant['category'] = data.businesses[i].categories;
-						restaurant['rating_img_url'] = data.businesses[i].rating_img_url;
-						names +=" , "+data.businesses[i].name;
-						myId = data.businesses[i].id
-						places[myId] = restaurant;
-						ids.push(myId);
+					{
+						searchTermPromises.push(new Promise(function(resolve, reject){
+							yelp.search({ term: 'restaurant', location: 'San Francisco', category_filter: results[i], sort:2})
+							.then(function (data) {
+								var names = "";
+								var places = {}
+								
+								for(var i=0;i<data.businesses.length;i++){
+									var restaurant = {};
+									restaurant['name'] =  data.businesses[i].name;
+									restaurant['mobile_url'] = data.businesses[i].mobile_url;
+									restaurant['rating'] = data.businesses[i].rating;
+									restaurant['review_count'] = data.businesses[i].review_count;
+									restaurant['image_url'] = data.businesses[i].image_url;
+									restaurant['category'] = data.businesses[i].categories;
+									restaurant['rating_img_url'] = data.businesses[i].rating_img_url;
+									places[data.businesses[i].id] = restaurant;
+									
+								}
+								resolve(places);
+							})
+							.catch(function (err) {
+								console.error(err);
+								res.send('Unable to process request');
+							});
+						}));
 					}
-					console.log(data.total)
+				}
+				Promise.all(searchTermPromises).then(function(results){
+					var ids = [];
+					places = {}
+					count = {};
+					totalCount = 0;
+					
+					for(var searchTerm in searchTerms){
+						count[searchTerm] = doc['search'][searchTerm].length;
+						totalCount += doc['search'][searchTerm].length;
+						
+					}
+					console.log(count)
+
+					for(i=0;i<results.length;i++){
+						j=0;
+						
+						for(var id in results[i]){
+							searchTerm = results[i][id]['category'][0][0].toLowerCase();
+							console.log(8*count[searchTerm]/totalCount);
+							if(j > (8*count[searchTerm]/totalCount))
+								break;
+							j++;
+							console.log(searchTerm+j);
+							ids.push(id);
+							places[id] = results[i][id];
+							
+						}
+					}
 					db.collection(GROUP_COLLECTION).findOne({group_id: group_id}, function(err, doc){
 						if(!err && doc!=null){
-								for(i=0;i<ids.length;i++){
-									if(doc['places'][ids[i]] != null){
-										places[ids[i]]['votes'] = doc['places'][ids[i]]['votes']==null?[]:doc['places'][ids[i]]['votes'];
-									}else{
-										places[ids[i]]['votes'] = []
-									}
+							for(i=0;i<ids.length;i++){
+								if(doc['places'][ids[i]] != null){
+									places[ids[i]]['votes'] = doc['places'][ids[i]]['votes']==null?[]:doc['places'][ids[i]]['votes'];
+								}else{
+									places[ids[i]]['votes'] = []
 								}
-								doc['places'] = places;
-								db.collection(GROUP_COLLECTION).updateOne({group_id: group_id}, doc, function(err, mydoc) {
-									if (err) {
-										handleError(res, err.message, "Failed to update group doc");
-									} else{
-										doc['total']=data.total;
-										res.send(doc);
-									}
-								});
 							}
+							doc['places'] = places;
+							db.collection(GROUP_COLLECTION).updateOne({group_id: group_id}, doc, function(err, mydoc) {
+								if (err) {
+									handleError(res, err.message, "Failed to update group doc");
+								} else{
+									res.send(doc);
+								}
+							});
+						}
 					});
-					
 
-				})
-				.catch(function (err) {
-					console.error(err);
-					res.send('Unable to process request');
+
+					
 				});
-			}, function(resson){
-				console.log("hello"+resson);
 			});
-			
+
 
 		}
 	});
-
-	
 }
+
+
+
+
+
+
+
+
+
+
 
 function insertGroupDoc(group_id){
 	var doc = {group_id: group_id};
