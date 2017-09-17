@@ -186,7 +186,14 @@ function getSuggestionsForGroup(group_id, res){
 						if(doc != null){
 							resolve(doc.alias);
 						}else{
-							resolve("");
+							query = ".*"+search+".*";
+							db.collection(YELP_COLLECTION).findOne({title: {$regex : query}}, function(err, doc){
+								if(doc!=null){
+									resolve(doc.alias);
+								}else{
+									resolve("");
+								}
+							});
 						}
 					});
 				}));
