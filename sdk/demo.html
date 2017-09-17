@@ -1,0 +1,88 @@
+<!--本Demo登陆测试帐号：mengyuanyuan，密码：123456, 测试对方账号：asdfghj，密码：123456-->
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>环信测试demo</title>
+    <script src="../demo/javascript/dist/webim.config.js"></script>
+    <script src="./dist/strophe-1.2.8.min.js"></script>
+    <script src="./dist/websdk-1.4.11.js"></script>
+    <script src="../webrtc/dist/adapter.js"></script>
+    <script src="../webrtc/dist/webrtc-1.4.11.js"></script>
+</head>
+<body>
+<h2>Text Box</h2>
+<div>
+    <input type="text" id="text">
+</div>
+<h2>Private</h2>
+<div>
+    <button id="register">Register</button>
+    <button id="privateText">PrivateText</button>
+    <button id="privateCmd">PrivateCmd</button>
+    <button id="logout">logout</button>
+    <button id="reConn">reConn</button>
+    <div>
+        <br>
+        image: <input type="file" id="image">
+        <button id="privateImg">PrivateImg</button>
+    </div>
+    <br>
+    <video id="privateVideo" style="border: 1px solid black" autoplay controls></video>
+</div>
+
+<h2>ChatRoom</h2>
+<div>
+    <button id="roomJoin">JoinRoom</button>
+    <button id="roomText">RoomText</button>
+    <button id="roomQuit">RoomQuit</button>
+    <button id="listChatRooms">ListChatRooms</button>
+</div>
+
+<h2>Group</h2>
+<div>
+    <button id="groupCreate">GroupCreate</button>
+    <button id="groupText">GroupText</button>
+    <button id="groupMember">GroupMember</button>
+    <button id="queryGroupInfo">QueryGroupInfo</button>
+    <button id="leaveGroup">LeaveGroup</button>
+    <button id="addToGroupBlackList">AddToGroupBlackList</button>
+    <button id="listGroups">ListGroups</button>
+    <button id="changeGroupInfo">ChangeGroupInfo</button>
+    <button id="getGroupBlackList">GetGroupBlackList</button>
+    <button id="destroyGroup">DestroyGroup</button>
+    <button id="addGroupMembers">AddGroupMembers</button>
+    <button id="removeGroupMemberFromBlackList">RemoveGroupMemberFromBlackList</button>
+</div>
+
+<h3>Roasters</h3>
+<div>
+    <button id="getRoasters">GetRoasters</button>
+    <button id="addFriends">AddFriends</button>
+    <button id="agreeFriends">AgreeFriends</button>
+    <button id="rejectFriends">RejectFriends</button>
+    <button id="removeRoster">RemoveRoster</button>
+    <button id="addToBlackList">AddToBlackList</button>
+    <button id="getBlackList">GetBlackList</button>
+    <button id="removeFromBlackList">RemoveFromBlackList</button>
+</div>
+
+<h3>WebRTC</h3>
+<div>
+    <button id="rtCall">Call</button>
+    <button id="rtAcceptCall">AcceptCall</button>
+    <button id="rtEndCall">EndCall</button>
+    <button id="rtAudioCall">AudioCall</button>
+    <div>
+        <video id="video" style="border: 1px solid red" autoplay>
+
+        </video>
+        <video id="localVideo" style="border: 1px solid blue" autoplay>
+
+        </video>
+    </div>
+</div>
+<script src="./dist/demo_js.js"></script>
+
+
+</body>
+</html>

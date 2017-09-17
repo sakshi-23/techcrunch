@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
+
+    <link href="style.css" rel="stylesheet">
+    <script src="browser-polyfill.min.js"></script>
+
+<script src="kquery.js"></script>
+
+
+</head>
+<body>
+<div class="body-image"></div>
+
+ <div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Reserve</h4>
+        </div>
+        <div class="modal-body">
+          <p>Reserve <i> Garaje </i> Now for 7pm?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Done</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+
+<div class="chat_window">
+      <div class="top_menu">
+      <div class="buttons">
+         <span class="previous round">&#8249;</span>
+      </div>
+      <div class="title ">GroupSync <span class="glyphicon glyphicon-plus" style="float:right"></span></div>
+      <div class="title-groups"><span id="show_messages" class="menu active">Conversations</span><span id="show_restaurants" class="menu">Arby  <span class="glyphicon glyphicon-record"></span><span class="count"></span></span></div>
+   </div>
+    <div class="show_signin">
+    <div class="login">
+    <input type="text" placeholder="Username" id="username">
+  <input type="password" placeholder="password" id="password">
+  <a href="#" class="forgot">forgot password?</a>
+  <a href="#" class="forgot" style="margin-right: 15px;">Sign up</a>
+  <input id="signin" type="submit" value="Sign In">
+</div>
+<div class="shadow"></div>
+        </div>
+
+<div class="show_message_list">
+
+     <ul class="people">
+
+
+      </ul>
+</div>
+<div class="show show_restaurants show_messages">
+
+    <div class="show_restaurants show">
+            <div class="dropdown">
+  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+    Sort
+    <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+    <li><a href="#">Action</a></li>
+    <li><a href="#">Another action</a></li>
+    <li><a href="#">Something else here</a></li>
+    <li role="separator" class="divider"></li>
+    <li><a href="#">Separated link</a></li>
+  </ul>
+</div>
+          <div class="yelp">   Powered by Yelp</div>
+        <div class="restaurants">
+
+        </div>
+        <div class="restaurant_template">
+           <div class="restaurant">
+               <img class="image" >
+              <div class="name contents"></div>
+               <img class="rating contents">
+              <div class="reviews contents"></div>
+               <div class="votes contents"><span class="glyphicon glyphicon-thumbs-up"></span><span class="vote-count"></span></div>
+                 <div class="category contents"></div>
+                <div class="book contents"></div>
+
+           </div>
+        </div>
+
+    </div>
+
+<div class="show_messages show">
+     <div class="people-list"></div>
+   <ul class="messages"></ul>
+
+
+
+
+
+
+
+<div class="message_template">
+   <div class="message">
+      <div class="avatar"></div>
+       <div class="from"></div>
+      <div class="text_wrapper">
+         <div class="text"></div>
+
+      </div>
+       <div class="time"></div>
+   </div>
+    </div>
+</div>
+    <div class="bottom_wrapper clearfix">
+      <div class="message_input_wrapper"><input class="message_input" placeholder="Type your message here..." /></div>
+      <div class="send_message">
+         <div class="icon"></div>
+         <div class="text">Send</div>
+      </div>
+   </div>
+    </div>
+<script src="webim.config.js"></script>
+
+<!--sdk-->
+<script>
+    if (WebIM.config.isWindowSDK) {
+        document.title = "Hyphenate web demo with Windows SDK";
+    }
+    if (WebIM.config.isDebug) {
+        document.write("<script src='./sdk/dist/strophe-1.2.8.js'><\/script>");
+    } else {
+        <!--A JavaScript library for XMPP over Websocket-->
+        document.write("<script src='./sdk/dist/strophe-1.2.8.min.js'><\/script>");
+    }
+</script>
+<script src='./sdk/dist/websdk-1.4.11.js'></script>
+<!--webrtc-->
+<script>
+    if (WebIM.config.isWebRTC) {
+        document.write("<script src='./webrtc/dist/adapter.js'><\/script>");
+        document.write("<script src='./webrtc/dist/webrtc-1.4.11.js'><\/script>");
+    }
+
+</script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="connector.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
+
+
+
