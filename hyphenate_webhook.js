@@ -114,7 +114,7 @@ app.post('/vote', function(req, res){
 	var group_id = req.body.group_id;
 	var user_id = req.body.user_id;
 	var place_id = req.body.place_id;
-	console.log(group_id+user_id+place_id);
+	console.log("logg"+group_id+user_id+place_id);
 	db.collection(GROUP_COLLECTION).findOne({group_id: group_id}, function(err, doc) {
 		if(doc!=null){
 			if(!isInArray(doc['places'][place_id]['votes'], user_id))
