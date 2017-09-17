@@ -68,11 +68,32 @@ app.post('/register', function(req,res){
 
 
 app.post('/webhook', function(req, res){
+	var group_id = req.body.group_id;
+	db.collection(GROUP_COLLECTION).findOne( {group_id: group_id}, function(err, doc){
+		if(!doc){
+			insertGroupDoc(group_id);
+		}
+	});
+	console.log(group_id);
 	for(var i=0; i<req.body.payload.bodies.length;i++){
 		var msg = req.body.payload.bodies[i].msg
 		wordpos.getNouns(msg, function(words){
 			for(var i=0;i<words.length;i++){
 				if(isCusine(words[i])){
+					db.collection(GROUP_COLLECTION).findOne({ group_id: group_id }, function(err, doc) {
+						if (err) {
+							handleError(res, err.message, "Failed to get contact");
+						} else {
+							if(sentiment(msg).score>0){
+								doc['search'] = words[i];
+								db.collection(GROUP_COLLECTION).updateOne({group_id: group_id}, doc, function(err, doc) {
+									if (err) {
+										handleError(res, err.message, "Failed to update contact");
+									} 
+								});
+							}
+						}
+					});
 					console.log(sentiment(msg).score+" "+ words[i]);
 				}
 			}
@@ -93,16 +114,16 @@ app.get('/suggestions/:id', function(req, res){
 
 app.post('/test', function(req, res){
 	var groupID = '27480740134913';
-		var myBody = { target_type: 'chatgroups',
-		target: [ groupID ],
-		msg: { type: 'txt', msg: req.body.msg},
-		from: 'admin' };
-		hyphenate_options['body'] = myBody
-		request(hyphenate_options, function (error, response, body) {
-			if (error) throw new Error(error);
-			console.log(body);
-			res.send("Done");
-		});
+	var myBody = { target_type: 'chatgroups',
+	target: [ groupID ],
+	msg: { type: 'txt', msg: req.body.msg},
+	from: 'satya' };
+	hyphenate_options['body'] = myBody
+	request(hyphenate_options, function (error, response, body) {
+		if (error) throw new Error(error);
+		console.log(body);
+		res.send("Done");
+	});
 })
 
 
@@ -137,7 +158,19 @@ function getSuggestionsForGroup(group_id, res){
 	});
 }
 
+function insertGroupDoc(group_id){
+	var doc = {group_id: group_id};
+	db.collection(GROUP_COLLECTION).insertOne(doc, function(err, doc) {
+		if (err) {
+			handleError(res, err.message, "Failed to create new contact.");
+		} 
+	});
+
+}
+
+
+
 
 function isCusine(word) {
-    return cusines.indexOf(word.toLowerCase()) > -1;
+	return cusines.indexOf(word.toLowerCase()) > -1;
 }
