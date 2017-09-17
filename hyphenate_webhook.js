@@ -123,11 +123,14 @@ app.post('/vote', function(req, res){
 				db.collection(GROUP_COLLECTION).updateOne({group_id: group_id}, doc, function(err, doc) {
 					if (err) {
 						handleError(res, err.message, "Failed to update group doc");
-					} 
+					} else{
+						res.send("Ok");
+					}
 				});
 			}
 		}
 	});
+	res.send("Ok");
 });
 
 
@@ -180,17 +183,21 @@ function getSuggestionsForGroup(group_id, res){
 				promises.push(new Promise(function(resolve, reject) {
 					var query = search.toLowerCase();
 					db.collection(YELP_COLLECTION).findOne({title: query}, function(err, doc){
-						resolve(doc.alias);
+						if(doc != null){
+							resolve(doc.alias);
+						}else{
+							resolve("");
+						}
 					});
 				}));
-				
-
 			}
 			Promise.all(promises).then(function(results){
 				for(i=0;i<results.length;i++){
-					searchString += results[i]+",";
+					if(results[i].length>1)
+						searchString += results[i]+",";
 				}
 				searchString = searchString.slice(0,-1);
+				console.log(searchString);
 				yelp.search({ term: 'restaurants', location: 'San Francisco', category_filter:searchString })
 				.then(function (data) {
 					var names = "";
