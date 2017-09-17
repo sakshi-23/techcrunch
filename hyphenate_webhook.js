@@ -82,7 +82,7 @@ app.post('/webhook', function(req, res){
 						if (err) {
 							handleError(res, err.message, "Failed to get group doc");
 						} else {
-							if(sentiment(msg).score>0){
+							if(sentiment(msg).score>=0){
 								if(doc != null){
 									if(!isInArray(doc['search'], keyWord)){
 										doc['search'].push(keyWord);
