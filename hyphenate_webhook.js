@@ -69,11 +69,6 @@ app.post('/register', function(req,res){
 
 app.post('/webhook', function(req, res){
 	var group_id = req.body.group_id;
-	db.collection(GROUP_COLLECTION).findOne( {group_id: group_id}, function(err, doc){
-		if(!doc){
-			insertGroupDoc(group_id);
-		}
-	});
 	console.log(group_id);
 	for(var i=0; i<req.body.payload.bodies.length;i++){
 		var msg = req.body.payload.bodies[i].msg
@@ -85,12 +80,21 @@ app.post('/webhook', function(req, res){
 							handleError(res, err.message, "Failed to get contact");
 						} else {
 							if(sentiment(msg).score>0){
-								doc['search'] = words[i];
-								db.collection(GROUP_COLLECTION).updateOne({group_id: group_id}, doc, function(err, doc) {
+								if(!doc){
+									doc['search'] = words[i];
+									db.collection(GROUP_COLLECTION).updateOne({group_id: group_id}, doc, function(err, doc) {
 									if (err) {
 										handleError(res, err.message, "Failed to update contact");
 									} 
-								});
+									});
+								}else{
+									var doc = {search: words[i]};
+									db.collection(GROUP_COLLECTION).insertOne({group_id: group_id}, doc, function(err, doc) {
+									if (err) {
+										handleError(res, err.message, "Failed to update contact");
+									} 
+									});
+								}
 							}
 						}
 					});
