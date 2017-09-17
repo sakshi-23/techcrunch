@@ -73,7 +73,6 @@ app.post('/webhook', function(req, res){
 	console.log('\n\n\nGroupId '+group_id+' From: '+req.body.from);
 	for(var i=0; i<req.body.payload.bodies.length;i++){
 		var msg = req.body.payload.bodies[i].msg
-		console.log(msg);
 		wordpos.getNouns(msg, function(words){
 			for(var i=0;i<words.length;i++){
 				if(isCusine(words[i])){
@@ -218,6 +217,8 @@ function getSuggestionsForGroup(group_id, res){
 						restaurant['rating'] = data.businesses[i].rating;
 						restaurant['review_count'] = data.businesses[i].review_count;
 						restaurant['image_url'] = data.businesses[i].image_url;
+						console.log(data.businesses[i].categories)
+						restaurant['category'] = data.businesses[i].categories;
 						restaurant['votes'] = [];
 						names +=" , "+data.businesses[i].name;
 						myId = data.businesses[i].id
