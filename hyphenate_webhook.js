@@ -71,7 +71,7 @@ app.post('/webhook', function(req, res){
 		var msg = req.body.payload.bodies[i].msg
 		console.log(sentiment(msg));
 		wordpos.getNouns(msg, function(words){
-			console.log(words);
+			console.log("Nouns "+words);
 		});
 	}
 	res.status(200).send();
