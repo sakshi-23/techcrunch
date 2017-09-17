@@ -54,6 +54,7 @@ json: true };
 var sentiment = require('sentiment');
 var WordPOS = require('wordpos'),
 wordpos = new WordPOS();
+var cusines= ["indian", "pizza", "burgers", "italian", "mexican","beer","cocktails", "wings"];
 
 //-------- Endpoints ------- 
 app.get('/', function(req,res) {
@@ -69,9 +70,12 @@ app.post('/register', function(req,res){
 app.post('/webhook', function(req, res){
 	for(var i=0; i<req.body.payload.bodies.length;i++){
 		var msg = req.body.payload.bodies[i].msg
-		console.log(sentiment(msg));
 		wordpos.getNouns(msg, function(words){
-			console.log("Nouns "+words);
+			for(var i=0;i<words.length;i++){
+				if(isCusine(words[i])){
+					console.log(sentiment(msg).score+" "+ words[i]);
+				}
+			}
 		});
 	}
 	res.status(200).send();
@@ -131,4 +135,9 @@ function getSuggestionsForGroup(group_id, res){
 		console.error(err);
 		res.send('Unable to process request');
 	});
+}
+
+
+function isCusine(word) {
+    return cusines.indexOf(word.toLowerCase()) > -1;
 }
