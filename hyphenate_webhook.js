@@ -231,7 +231,11 @@ function getSuggestionsForGroup(group_id, res){
 					db.collection(GROUP_COLLECTION).findOne({group_id: group_id}, function(err, doc){
 						if(!err && doc!=null){
 								for(i=0;i<ids.length;i++){
-									places[ids[i]]['votes'] = doc['places'][ids[i]]['votes']==null?[]:doc['places'][ids[i]]['votes'];
+									if(doc['places'][ids[i]] != null){
+										places[ids[i]]['votes'] = doc['places'][ids[i]]['votes']==null?[]:doc['places'][ids[i]]['votes'];
+									}else{
+										places[ids[i]]['votes'] = []
+									}
 								}
 								doc['places'] = places;
 								db.collection(GROUP_COLLECTION).updateOne({group_id: group_id}, doc, function(err, mydoc) {
